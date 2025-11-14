@@ -9,7 +9,7 @@ To run the evaluations, you first need to install the required dependencies by r
 Once the dependencies are installed, you can run the evaluation using `uv run pytest` from the root of the project:
 
 ```bash
-uv run pytest eval/test_eval.py
+pytest eval/test_eval.py
 ```
 
 ## Test Scenarios
