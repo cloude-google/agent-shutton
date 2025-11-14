@@ -91,12 +91,6 @@ adk web
 python -m tests.test_agent
 ```
 
-**Run the evaluation (smoke test):**
-
-```bash
-pytest eval/test_eval.py
-```
-
 ## Project Structure
 
 The project is organized as follows:
