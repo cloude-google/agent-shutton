@@ -6,6 +6,8 @@ NOTE: This sample submssion was inspired and lifted from the official [ADK-Sampl
 
 This project contains the core logic for Agent Shellton, a multi-agent system designed to assist users in creating various types of blog posts. The agent is built using Google Agent Development Kit (ADK) and follows a modular architecture.
 
+![Architecture](./thumbnail.png "Optional Title")
+
 ### Problem Statement
 
 Writing blogs manually is laborious because it requires significant time investment in research, drafting, editing, and formatting each piece of content from scratch. The repetitive nature of structuring posts and maintaining consistent tone across multiple articles can quickly become mentally exhausting and drain creative energy. Manual blog writing also struggles to scale when content demands increase, forcing writers to choose between quality and quantity or invest in hiring additional staff. Automation can streamline research gathering, generate initial drafts, handle formatting consistency, and maintain publishing schedules, allowing human writers to focus their expertise on strategic direction, creative refinement, and adding unique insights that truly require human judgment.
