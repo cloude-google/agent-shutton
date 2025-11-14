@@ -1,6 +1,6 @@
 ## Project Overview - Agent Shellton
 
-NOTE: This is a **sample submssion** for the Kaggle Capstone project. Use this as a point of reference for structuring your submission. Avoid simply copying and reusing logic and or concepts.
+NOTE: This is a **sample submssion** for the [Kaggle Agents Intensive Capstone project](https://www.kaggle.com/competitions/agents-intensive-course-capstone-2025/). Use this as a point of reference for structuring your submission. Avoid simply copying and reusing logic and or concepts.
 
 NOTE: This sample submssion was inspired and lifted from the official [ADK-Samples](https://github.com/google/adk-samples/tree/main/python/agents/blog-writer) repository. Special thanks to Pier Paolo Ippolito for his contributions. 
 
@@ -17,7 +17,7 @@ Writing blogs manually is laborious because it requires significant time investm
 Agents can automatically research topics by gathering information from multiple sources, synthesizing key insights, and identifying trending themes relevant to your target audience. They can generate initial draft outlines or full articles based on specific parameters like tone, length, significantly reducing the time spent on the blank page problem. Additionally, agents can manage the entire publishing workflow by scheduling posts, distributing content across multiple platforms, monitoring performance metrics, and even suggesting improvements based on engagement data—transforming blog management from a manual chore into a streamlined, data-driven process.
 
 ### Architecture
-The `blogger_agent` is a prime example of a multi-agent system. It's not a monolithic application but an ecosystem of specialized agents, each contributing to a different stage of the blog creation process. This modular approach, facilitated by Google's Agent Development Kit, allows for a sophisticated and robust workflow. The central orchestrator of this system is the `interactive_blogger_agent`.
+Core to Agent Shellton is the `blogger_agent` -- a prime example of a multi-agent system. It's not a monolithic application but an ecosystem of specialized agents, each contributing to a different stage of the blog creation process. This modular approach, facilitated by Google's Agent Development Kit, allows for a sophisticated and robust workflow. The central orchestrator of this system is the `interactive_blogger_agent`.
 
 ![Architecture](./flow_adk_web.png "Optional Title")
 
@@ -65,11 +65,11 @@ The `blogger_agent` is a compelling demonstration of how multi-agent systems, bu
 
 ### Value Statement
 
-Agent Shellton reduced my blog development time by 6-8 hours per week, enabling me to produce more content and higher quality content.
+Agent Shellton reduced my blog development time by 6-8 hours per week, enabling me to produce more content at higher quality.
 
 ## Installation
 
-This project was built against Python 3.11.3
+This project was built against Python 3.11.3.
 
 It is suggested you create a vitrual environment using your preferred tooling e.g. uv.
 
@@ -77,7 +77,7 @@ Install dependenies e.g. pip install -r requirements.txt
 
 ### Running the Agent in ADK Web mode
 
-From the command line of the working directory execute 
+From the command line of the working directory execute the following command. 
 
 ```bash
 adk web
@@ -111,32 +111,7 @@ The project is organized as follows:
 *   `eval/`: Contains the evaluation framework for the agent.
 *   `tests/`: Contains integration tests for the agent.
 
-## Agent Architecture
 
-The Blogger Agent is a multi-agent system composed of a main orchestrator agent and several specialized sub-agents.
-
-
-### Main Agent
-
-*   **`interactive_blogger_agent`**: This is the main agent that interacts with the user. It manages the workflow of creating a blog post and delegates tasks to the appropriate sub-agents.
-
-### Sub-Agents
-
-The sub-agents are defined in the `blogger_agent/sub_agents/` directory. Each sub-agent is responsible for a specific task in the blog post creation process:
-
-*   **`robust_blog_planner`**: Generates a blog post outline. It uses a loop to ensure a valid outline is created and can use Google Search to gather information.
-*   **`robust_blog_writer`**: Writes the blog post based on the approved outline. It can also use Google Search to find relevant information and examples.
-*   **`blog_editor`**: Edits the blog post based on user feedback.
-*   **`social_media_writer`**: Generates social media posts to promote the blog post.
-
-## Tools
-
-The agents use the following custom tools, defined in `blogger_agent/tools.py`:
-
-*   **`save_blog_post_to_file`**: Saves the blog post to a file.
-*   **`analyze_codebase`**: Analyzes the codebase in a given directory to provide context for the blog post.
-
-The agents also use the built-in `google_search` tool.
 
 ## Workflow
 
@@ -151,46 +126,3 @@ The `interactive_blogger_agent` follows this workflow:
 7.  **Social Media:** After the user approves the blog post, the agent asks if they want to generate social media posts. If the user agrees, the `social_media_writer` is used.
 8.  **Export:** When the user approves the final version, the agent asks for a filename and saves the blog post as a markdown file using the `save_blog_post_to_file` tool.
 
-## Example Conversation
-
-**User:** I want to write a blog post about the new Google Gemini 2.5 Flash Preview model, also known as Nanobanana.
-
-**Agent:** I can do that. Here is a blog post outline for an article about the Google Gemini 2.5 Flash Preview model.
-
----
-
-## Blog Post Outline: Introducing Gemini 2.5 Flash: Google's Newest, Fastest AI Model
-
-### I. Title
-Gemini 2.5 Flash: The Speed and Efficiency of Nanobanana
-
-### II. Introduction
-*   **Hook:** Announcing Google's latest AI model, Gemini 2.5 Flash, nicknamed Nanobanana.
-*   **Context:** Explain that this new model is designed for speed and efficiency, making it ideal for on-device applications.
-*   **Thesis Statement:** This post will explore the key features of Gemini 2.5 Flash, its capabilities, and how it compares to other models in the Gemini family.
-
-### III. Main Body
-
-#### A. What is Gemini 2.5 Flash?
-*   **Lightweight and Cost-Effective:** Describe how Gemini 2.5 Flash is a smaller, more efficient model compared to its predecessors.
-*   **Multimodal Capabilities:** Explain that it can process text, audio, images, and video.
-*   **1-Million Token Context Window:** Discuss the large context window and its implications for processing large amounts of information.
-*   **'Thinking' Capability:** Detail the new feature that provides transparency into the model's reasoning process.
-
-#### B. Key Features and Enhancements
-*   **Speed and Efficiency:** Emphasize the model's performance on low-power devices.
-*   **Controlled Generation, Function Calling, and Search:** Discuss the model's advanced functionalities.
-*   **Specialized Versions:** Mention the specialized versions for live API, image generation, and text-to-speech.
-
-#### C. How to Get Access
-*   **Availability:** Explain that the model is available through the Gemini API, Google AI Studio, and Vertex AI.
-
-### IV. Conclusion
-*   **Summary:** Recap the key features and benefits of Gemini 2.5 Flash.
-*   **Call to Action:** Encourage readers to explore the new model and its capabilities.
-
----
-
-**User:** looks good, write it
-
-**Agent:** You have two options for including visual content in your blog post...
