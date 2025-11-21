@@ -1,0 +1,287 @@
+# Capstone Project — Study Planner Agent (No-code, Google AI Studio)
+
+**Course:** 5‑Day AI Agents Intensive Course
+**Format:** No-code (AI Studio agent) — ready for submission
+
+---
+
+## 1 — Project Overview (Short summary)
+
+Build a **Study Planner Agent** that helps students create a personalised study timetable, divide syllabus into revision blocks, set priorities, and give tips for effective study sessions. The agent should accept subjects, exam date(s), available hours per day, and produce a day-by-day plan and short study reminders.
+
+**Why this project?** Practical, useful for students, can be built quickly with prompts and tool composition in AI Studio.
+
+---
+
+## 2 — Problem statement
+
+Many students struggle to organise revision effectively before exams. The agent must transform syllabus and time constraints into a realistic, balanced study schedule that includes revision cycles, breaks, and priority topics.
+
+**Target user:** 11th standard State Board students (single user), but easily adjustable.
+
+---
+
+## 3 — Objectives and success criteria
+
+**Objectives**
+
+* Generate a structured study timetable for a given date range.
+* Allocate topics/chapters across available hours fairly, prioritising weak subjects if provided.
+* Provide short study tips and a daily checklist.
+
+**Success criteria**
+
+* Produces a valid day-by-day plan covering all supplied topics before the exam date.
+* Respects daily available hours and includes breaks/rest time.
+* Gives clear, concise instructions the student can follow.
+
+---
+
+## 4 — Required inputs (agent prompts / fields)
+
+When the user starts, agent asks for (or accepts as a single prompt):
+
+1. **Exam date** (or date range) — e.g. 2025-12-05
+2. **Subjects + list of topics/chapters per subject** (or total chapters count) — e.g. Maths: Algebra(8 ch), Geometry(6 ch)
+3. **Available study hours per day** — e.g. 4 hours/day
+4. **Priority / weak subjects** (optional)
+5. **Preferred study session length** (optional — default: 45–50 minutes)
+6. **Days off** (optional)
+
+---
+
+## 5 — Design (No-code AI Studio structure)
+
+**Agent components / steps**
+
+1. **Input collection prompt** — friendly questions to collect the six fields above.
+2. **Planner prompt** — main prompt that calculates days available, total study time, divides chapters/topics into sessions, and returns a day-by-day schedule.
+3. **Checklist generator** — produces a short checklist for each study day.
+4. **Revision scheduler** — adds 1–2 revision cycles for each subject before exam.
+5. **Short tips / motivation** — 2–3 study tips per day or per subject.
+6. **Validation step** — ensure plan fits within available hours and covers all topics.
+
+Implement these as either chained prompts or actions in AI Studio. Each step returns structured JSON or plain text.
+
+---
+
+## 6 — Core prompt templates (copy-paste into AI Studio)
+
+### A. Input collection (single compact prompt)
+
+```
+You are StudyPlanner, a helpful assistant that builds study timetables.
+Ask the user for: exam date, subjects with topics (or number of chapters), available study hours per day, priority/weak subjects (optional), preferred session length in minutes (default 45), and any days off.
+Respond in JSON with keys: exam_date, subjects (object), hours_per_day, weak_subjects, session_length, days_off.
+```
+
+### B. Planner prompt (main logic)
+
+```
+You are StudyPlanner. Using this input JSON, create a day-by-day study plan from today until the exam date.
+Rules:
+1. Count how many study days are available (exclude days_off).  
+2. Estimate total study minutes = study_days * hours_per_day * 60.
+3. For each subject, break chapters into sessions; aim for sessions of session_length minutes with 10 minute breaks after each session.  
+4. If weak_subjects supplied, give them 20% extra session allocation.  
+5. Include 2 revision cycles: one at ~25% remaining days before exam, and final revision 3 days before exam.  
+6. Ensure the plan finishes covering all chapters at least once before the final revision window.  
+7. Output: a JSON object with schedule (array of days), and for each day: date, study_blocks (array of {subject, chapter, duration_minutes, start_time_hint}), daily_checklist (short list), and day_summary (1-2 lines).  
+8. If hours_per_day is too low to cover the syllabus, propose either increasing daily hours or extending study days (remove days_off).  
+
+Use concise, student-friendly language.
+```
+
+### C. Daily checklist generator (small prompt)
+
+```
+Given a study day’s study_blocks, return 5 short checklist items the student should follow (e.g., "Complete Block 1: Algebra Ch 1-2", "Take 10-min break", "Use active recall"). Return as a JSON array.
+```
+
+### D. Tips generator
+
+```
+For each subject produce 2 quick study tips (one technique + one reminder). Return as subject->array.
+```
+
+---
+
+## 7 — Example AI Studio action wiring (suggested)
+
+1. Start node: Input collection prompt (store JSON)
+2. Planner node: Planner prompt (use stored JSON) -> returns schedule
+3. For each day: call Checklist generator and Tips generator (or call once and map by subject)
+4. Validation node: check total allocated minutes <= available minutes; if not, return recommendation message.
+5. Final node: format human-readable plan + JSON export link (or copy-paste block) for submission.
+
+---
+
+## 8 — Output format for submission (what to include in final files)
+
+* **Project report (PDF / Google Doc)** — 1–2 pages: Title, problem statement, tools used, how agent works, sample outputs, demo instructions, limitations, future improvements.
+* **Agent link** — AI Studio agent share link (paste into Google Form)
+* **Optional:** JSON export / Colab notebook with planner logic (if you coded)
+* **Demo video (optional):** 1-minute screen recording
+
+---
+
+## 9 — Rubric (suggested grading criteria)
+
+1. **Functionality (40%)** — Agent produces a valid, complete schedule.
+2. **Usability (20%)** — Clear instructions, easy-to-read plan.
+3. **Correctness (20%)** — Sessions and revision cycles correctly placed.
+4. **Creativity / Extras (10%)** — Tips, checklists, motivational messages.
+5. **Documentation (10%)** — Clean project report + links.
+
+---
+
+## 10 — Sample Project Report (copy into Google Doc / PDF)
+
+```
+Title: Smart Study Planner Agent
+Problem: Students need fast, personal study plans before exams.
+Tools: Google AI Studio (no-code), prompt chaining
+How it works: User enters exam date, subjects, chapters and hours/day. Agent computes available days, allocates sessions per chapter, schedules two revision cycles, and returns a day-by-day plan plus daily checklists and tips.
+Sample Output: (paste the example plan below)
+Limitations: Does not integrate calendar API (optional future work). May need manual time-of-day adjustments.
+Future: Calendar integration, mobile push reminders, user feedback loop.
+```
+
+---
+
+## 11 — Testing examples (use these to test your agent in AI Studio)
+
+Paste each test case into the Input collection step or provide as a single JSON input to the planner. Expected behaviour described after each case.
+
+### Test 1 — Simple single-subject short window
+
+**Input:**
+
+```json
+{
+  "exam_date": "2025-12-01",
+  "subjects": {"Maths": ["Algebra ch1","Algebra ch2","Geometry ch1"]},
+  "hours_per_day": 2,
+  "weak_subjects": ["Maths"],
+  "session_length": 45,
+  "days_off": []
+}
+```
+
+**Expected:** Plan spreads 3 chapters across remaining days, gives extra sessions to Maths (because weak), includes short daily checklists.
+
+### Test 2 — Multiple subjects, fixed days off
+
+**Input:**
+
+```json
+{
+  "exam_date": "2025-12-10",
+  "subjects": {"Physics": ["Ch1","Ch2","Ch3"], "Chemistry": ["Ch1","Ch2"]},
+  "hours_per_day": 3,
+  "weak_subjects": ["Physics"],
+  "session_length": 50,
+  "days_off": ["2025-11-22","2025-11-29"]
+}
+```
+
+**Expected:** Schedules account for days_off, gives more Physics sessions, schedules two revision cycles.
+
+### Test 3 — Many chapters, low hours (should advise)
+
+**Input:**
+
+```json
+{
+  "exam_date": "2025-11-30",
+  "subjects": {"Biology": ["Ch1","Ch2","Ch3","Ch4","Ch5","Ch6","Ch7","Ch8"]},
+  "hours_per_day": 1,
+  "weak_subjects": [],
+  "session_length": 45,
+  "days_off": []
+}
+```
+
+**Expected:** Agent should detect insufficient time and propose increasing hours or removing days_off. If forced, it should still allocate but mark it as "risky".
+
+### Test 4 — Realistic student (3 subjects)
+
+**Input:**
+
+```json
+{
+  "exam_date": "2025-12-05",
+  "subjects": {"Maths": ["Alg(8)","Geo(6)"], "English": ["Grammar","Poetry"], "CS": ["Ch1","Ch2","Ch3"]},
+  "hours_per_day": 4,
+  "weak_subjects": ["Maths"],
+  "session_length": 50,
+  "days_off": ["2025-11-28"]
+}
+```
+
+**Expected:** Full plan with ~4 hours/day blocks, spaced breaks, revision cycles, and daily checklists.
+
+### Test 5 — Custom session length
+
+**Input:** session_length = 30 — agent should create shorter blocks and increase number per day.
+
+### Test 6 — Late start (few days)
+
+**Input:** exam_date is 7 days away and many topics — should prioritize highest weight chapters and recommend urgent plan.
+
+### Test 7 — No weak subjects
+
+**Input:** no weak_subjects — allocate evenly.
+
+### Test 8 — Weekend-only study plan
+
+**Input:** hours_per_day set but days_off configured so only weekends remain — agent should allocate heavier sessions to weekends and warn about long sessions.
+
+---
+
+## 12 — Demo script (1-minute)
+
+1. Open AI Studio agent.
+2. Enter input: exam date, subjects, hours/day.
+3. Click run and show the generated day-by-day plan.
+4. Open a sample day to show study_blocks and daily_checklist.
+5. End with: "Link to agent and project report are in the submission."
+
+---
+
+## 13 — Submission text (paste into Google Form or email)
+
+```
+Project Title: Smart Study Planner Agent
+Team/Individual: Individual
+Short description: A no-code AI Studio agent that creates personalised study timetables, checklists, and revision schedules based on exam date, subjects, and daily available study time.
+Agent link: <paste AI Studio share link>
+Project report: <paste Google Doc or attach PDF>
+Notes: Built using prompt chaining in AI Studio. Works best with clear subject/chapter lists.
+```
+
+---
+
+## 14 — Limitations & future improvements
+
+* No calendar integration (future: add Google Calendar actions).
+* No user progress tracking or feedback loop (future: add memory + update schedule based on completion rates).
+* Time-of-day scheduling is a hint only; user may need to adjust.
+
+---
+
+## 15 — If you want a coding version (Colab + Python)
+
+Reply: **Please produce the Coding (Python) version** — I will create a Colab notebook with code to compute the schedule, JSON outputs, and tests included.
+
+---
+
+### End — Ready to submit
+
+Use this document as your capstone content. If you want, I can now:
+
+* Convert the sample plan into a PDF formatted project report, or
+* Create a shareable AI Studio prompt package, or
+* Build the Python/Colab coding version.
+
+Good luck — say the word and I’ll make the Colab notebook or the PDF report next.
