@@ -1,0 +1,232 @@
+manifest:
+  version: "0.1.3"
+  schema: https://a2as.org/cert/schema
+  subject:
+    name: cloude-google/agent-shutton
+    source: https://github.com/cloude-google/agent-shutton
+    branch: main
+    commit: "13978ac5"
+    scope: [blogger_agent/agent.py, blogger_agent/config.py, blogger_agent/sub_agents/__init__.py, blogger_agent/sub_agents/blog_editor.py,
+      blogger_agent/sub_agents/blog_planner.py, blogger_agent/sub_agents/blog_writer.py, blogger_agent/sub_agents/social_media_writer.py,
+      blogger_agent/tools.py]
+  issued:
+    by: A2AS.org
+    at: '2026-02-11T16:34:12Z'
+    url: https://a2as.org/certified/agents/cloude-google/agent-shutton
+  signatures:
+    digest: sha256:Q60DjjWXoi52JqvJuqX3NE-MQHZuq7ATx4IzBrWPYoc
+    key: ed25519:lJDClQvL5Sz5iznWTokeGZs2nvVNcI6sCV0d4J7Z3K4
+    sig: ed25519:CDvVCkXyGADeRNp-Gm7llAVz_PCRge3x91a1dV34AnEiOfxKSCr3tLs4ea62_sz0laM7l9FtgdasqBxlhFtkAA
+
+agents:
+  blog_editor:
+    type: instance
+    models: [gemini-2.5-pro]
+    params:
+      name: blog_editor
+      description: Edits a technical blog post based on user feedback.
+      instruction: [You are a professional technical editor. You will be given a blog post and user feedback., Your task is
+          to edit the blog post based on the provided feedback., The final output should be a revised blog post in Markdown
+          format.]
+      output_key: blog_post
+      after_agent_callback: suppress_output_callback
+  blog_planner:
+    type: instance
+    models: [gemini-2.5-flash]
+    tools: [google_search]
+    params:
+      name: blog_planner
+      description: Generates a blog post outline.
+      instruction: [You are a technical content strategist. Your job is to create a blog post outline., The outline should
+          be well-structured and easy to follow., 'It should include a title, an introduction, a main body with several sections,
+          and a conclusion.', 'If a codebase is provided, the outline should include sections for code snippets and technical
+          deep dives.', The codebase context will be available in the `codebase_context` state key., Use the information in
+          the `codebase_context` to generate a specific and accurate outline., Use Google Search to find relevant information
+          and examples to support your writing., Make sure you research is grounded in current time., Your final output should
+          be a blog post outline in Markdown format.]
+      output_key: blog_outline
+      after_agent_callback: suppress_output_callback
+  blog_post_validation_checker:
+    type: instance
+    models: [gemini-2.5-flash]
+    params:
+      name: blog_post_validation_checker
+  blog_writer:
+    type: instance
+    models: [gemini-2.5-pro]
+    tools: [google_search]
+    params:
+      name: blog_writer
+      description: Writes a technical blog post.
+      instruction: ['You are an expert technical writer, crafting articles for a sophisticated audience similar to that of
+          ''Towards Data Science'' and ''freeCodeCamp''.', 'Your task is to write a high-quality, in-depth technical blog
+          post based on the provided outline and codebase summary.', 'The article must be well-written, authoritative, and
+          engaging for a technical audience.', '- Assume your readers are familiar with programming concepts and software
+          development.', '- Dive deep into the technical details. Explain the ''how'' and ''why'' behind the code.', '- Use
+          code snippets extensively to illustrate your points.', '- Use Google Search to find relevant information and examples
+          to support your writing.', '- The codebase context will be available in the `codebase_context` state key.', The
+          final output must be a complete blog post in Markdown format. Do not wrap the output in a code block.]
+      output_key: blog_post
+      after_agent_callback: suppress_output_callback
+  interactive_blogger_agent:
+    type: instance
+    models: [config.worker_model]
+    tools: [save_blog_post_to_file, analyze_codebase]
+    params:
+      name: interactive_blogger_agent
+      description: The primary technical blogging assistant. It collaborates with the user to create a blog post.
+      instruction: [You are a technical blogging assistant. Your primary function is to help users create technical blog posts.,
+        'Your workflow is as follows:', '1.  **Plan:** You will generate a blog post outline and present it to the user. To
+          do this, use the `robust_blog_planner` tool.', '2.  **Refine:** The user can provide feedback to refine the outline.
+          You will continue to refine the outline until it is approved by the user.', '3.  **Visuals:** You will ask the user
+          to choose their preferred method for including visual content. You have two options for including visual content
+          in your blog post:', '1.  **Upload:** I will add placeholders in the blog post for you to upload your own images
+          and videos.', '2.  **None:** I will not include any images or videos in the blog post.', Please respond with "1"
+          or "2" to indicate your choice., '4.  **Write:** Once the user approves the outline, you will write the blog post.
+          To do this, use the `robust_blog_writer` tool. Be then open for feedback.', '5.  **Edit:** After the first draft
+          is written, you will present it to the user and ask for feedback. You will then revise the blog post based on the
+          feedback. This process will be repeated until the user is satisfied with the result.', '6.  **Social Media:** After
+          the user approves the blog post, you will ask if they want to generate social media posts to promote the article.
+          If the user agrees to create a social media post, use the `social_media_writer` tool.', '7.  **Export:** When the
+          user approves the final version, you will ask for a filename and save the blog post as a markdown file. If the user
+          agrees, use the `save_blog_post_to_file` tool to save the blog post.', If you are asked what is your name respond
+          with Agent Shellton., 'Current date: {datetime.datetime.now.strftime}']
+      output_key: blog_outline
+      sub_agents: [robust_blog_planner, robust_blog_writer, blog_editor, social_media_writer]
+  outline_validation_checker:
+    type: instance
+    models: [gemini-2.5-flash]
+    params:
+      name: outline_validation_checker
+  robust_blog_planner:
+    type: instance
+    params:
+      name: robust_blog_planner
+      description: A robust blog planner that retries if it fails.
+      max_iterations: "3"
+      after_agent_callback: suppress_output_callback
+      sub_agents: [blog_planner, outline_validation_checker]
+  robust_blog_writer:
+    type: instance
+    params:
+      name: robust_blog_writer
+      description: A robust blog writer that retries if it fails.
+      max_iterations: "3"
+      sub_agents: [blog_writer, blog_post_validation_checker]
+  social_media_writer:
+    type: instance
+    models: [gemini-2.5-pro]
+    params:
+      name: social_media_writer
+      description: Writes social media posts to promote the blog post.
+      instruction: ['You are a social media marketing expert. You will be given a blog post, and your task is to write social
+          media posts for the following platforms:', '- Twitter: A short, engaging tweet that summarizes the blog post and
+          includes relevant hashtags.', '- LinkedIn: A professional post that provides a brief overview of the blog post and
+          encourages discussion.', 'The final output should be a markdown-formatted string with the following sections:',
+        '### Twitter Post', '```', <twitter_post_content>, '```', '### LinkedIn Post', '```', <linkedin_post_content>, '```']
+      output_key: social_media_posts
+
+models:
+  config.worker_model:
+    type: literal
+    agents: [interactive_blogger_agent]
+  gemini-2.5-flash:
+    type: literal
+    agents: [blog_planner, outline_validation_checker, blog_post_validation_checker]
+  gemini-2.5-pro:
+    type: literal
+    agents: [social_media_writer, blog_editor, blog_writer]
+
+tools:
+  analyze_codebase:
+    type: wrapper
+    agents: [interactive_blogger_agent]
+    params:
+      wrapper: FunctionTool
+      wraps: analyze_codebase
+      description: Analyzes the codebase in the given directory.
+  google_search:
+    type: module
+    agents: [blog_planner, blog_writer]
+  save_blog_post_to_file:
+    type: wrapper
+    agents: [interactive_blogger_agent]
+    params:
+      wrapper: FunctionTool
+      wraps: save_blog_post_to_file
+      description: Saves the blog post to a file.
+
+teams:
+  interactive_blogger_agent:
+    type: hierarchy
+    agents: [interactive_blogger_agent, robust_blog_planner, robust_blog_writer, blog_editor, social_media_writer]
+  robust_blog_planner:
+    type: loop
+    agents: [robust_blog_planner, blog_planner, outline_validation_checker]
+  robust_blog_writer:
+    type: loop
+    agents: [robust_blog_writer, blog_writer, blog_post_validation_checker]
+
+imports:
+  Agent: google.adk.agents.Agent
+  analyze_codebase: tools.analyze_codebase
+  AsyncGenerator: typing.AsyncGenerator
+  auth: google.auth
+  BaseAgent: google.adk.agents.BaseAgent
+  blog_editor: blog_editor.blog_editor
+  BlogPostValidationChecker: validation_checkers.BlogPostValidationChecker
+  CallbackContext: google.adk.agents.callback_context.CallbackContext
+  config: config.config
+  Content: google.genai.types.Content
+  dataclass: dataclasses.dataclass
+  datetime: datetime
+  Event: google.adk.events.Event
+  EventActions: google.adk.events.EventActions
+  FunctionTool: google.adk.tools.FunctionTool
+  glob: glob
+  google_search: google.adk.tools.google_search
+  InvocationContext: google.adk.agents.invocation_context.InvocationContext
+  LoopAgent: google.adk.agents.LoopAgent
+  os: os
+  OutlineValidationChecker: validation_checkers.OutlineValidationChecker
+  robust_blog_planner: blog_planner.robust_blog_planner
+  robust_blog_writer: blog_writer.robust_blog_writer
+  root_agent: blogger_agent.agent.root_agent
+  save_blog_post_to_file: tools.save_blog_post_to_file
+  social_media_writer: social_media_writer.social_media_writer
+  suppress_output_callback: agent_utils.suppress_output_callback
+
+functions:
+  _run_async_impl:
+    type: async
+    module: blogger_agent.validation_checkers
+    args: [self, context]
+    params:
+      returns: AsyncGenerator
+  analyze_codebase:
+    type: sync
+    module: blogger_agent.tools
+    args: [directory]
+    params:
+      returns: dict
+  save_blog_post_to_file:
+    type: sync
+    module: blogger_agent.tools
+    args: [blog_post, filename]
+    params:
+      returns: dict
+  suppress_output_callback:
+    type: sync
+    module: blogger_agent.agent_utils
+    args: [callback_context]
+    params:
+      returns: Content
+
+files:
+  ./:
+    type: pattern
+    actions: [read]
+    params:
+      patterns: ['os.path.join(directory, ''**'')']
+      links: [os.path.join]
+      caller: [analyze_codebase]
